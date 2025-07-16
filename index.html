@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIRA AUTO GAS - CNG Savings Calculator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    a:hover {
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+
+    header a:hover img {
+      transform: scale(1.02);
+      transition: transform 0.3s ease;
+    }
+
+    img {
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
+    }
+
+    .form-row input[type="number"],
+    .dual-inputs input {
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    .form-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #4caf50 0%, #c8e6c9 100%);
+      outline: none;
+    }
+
+    .form-group input[type="range"]::-webkit-slider-thumb,
+    .form-group input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: white;
+      border: 2px solid #4caf50;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .form-group input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .toggle-buttons .btn.active {
+      background-color: #4caf50;
+      color: #fff;
+      border-color: #4caf50;
+    }
+
+    #savings span {
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="py-3 text-dark" style="background-color: #6af08a; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);">
+    <div class="container d-flex align-items-center gap-3 py-2 flex-wrap">
+      <a href="index.html" class="d-flex align-items-center">
+        <div class="p-1 rounded" style="max-height: 80px;">
+          <img src="logo3.png" alt="Mira Auto Gas Logo" class="img-fluid" style="max-height: 80px;">
+        </div>
+      </a>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <span class="fw-semibold">India</span>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="countryToggle" checked>
+        </div>
+        <span class="fw-semibold">Tanzania</span>
+      </div>
+    </div>
+  </header>
+
+  <h2 class="fw-semibold fs-5 text-start ms-4 mt-4 mb-3">CNG Savings Calculator</h2>
+
+  <main class="container my-5 p-4 bg-white rounded shadow">
+    <form id="savings-form">
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2 form-row">
+          <label for="kmsPerDayInput" class="form-label">KMs Per Day</label>
+          <input type="number" id="kmsPerDayInput" class="form-control w-auto" min="0" max="200" value="50">
+        </div>
+        <input type="range" id="kmsPerDay" class="form-range" min="0" max="200" value="50">
+        <div class="range-labels"><span>0</span><span>200</span></div>
+      </div>
+
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2 form-row">
+          <label for="petrolMileageInput" class="form-label">Petrol Mileage (km/ltr)</label>
+          <input type="number" id="petrolMileageInput" class="form-control w-auto" min="1" max="30" value="15">
+        </div>
+        <input type="range" id="petrolMileage" class="form-range" min="1" max="30" value="15">
+        <div class="range-labels"><span>0</span><span>30</span></div>
+      </div>
+
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2 form-row">
+          <label for="cngMileageInput" class="form-label">CNG Mileage (km/kg)</label>
+          <input type="number" id="cngMileageInput" class="form-control w-auto" min="1" max="40" value="25">
+        </div>
+        <input type="range" id="cngMileage" class="form-range" min="1" max="40" value="25">
+        <div class="range-labels"><span>0</span><span>40</span></div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Petrol Cost / Ltr</label>
+          <input type="number" id="fuelCost" class="form-control" value="2877">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Fuel Cost of CNG / kg</label>
+          <input type="number" id="cngCost" class="form-control" value="1400">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">CNG Kit Cost</label>
+          <input type="number" id="kitCost" class="form-control" placeholder="Enter CNG Kit Cost">
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <section id="graph-section">
+    <div id="graph-card" class="container my-4 p-4 bg-white rounded shadow">
+      <div class="toggle-buttons d-flex flex-wrap justify-content-center gap-2 my-3">
+        <button type="button" class="btn btn-outline-success toggle active" data-period="daily">Daily</button>
+        <button type="button" class="btn btn-outline-success toggle" data-period="monthly">Monthly</button>
+        <button type="button" class="btn btn-outline-success toggle" data-period="yearly">Yearly</button>
+        <button type="button" class="btn btn-outline-success toggle" data-period="lifetime">Lifetime</button>
+      </div>
+
+      <div style="max-width: 400px; margin: 20px auto;">
+        <canvas id="fuelChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div id="savings" class="text-center fw-semibold fs-5 mt-4">Adjust values to see fuel cost comparison and savings.</div>
+    <div id="payback" class="container mt-3"></div>
+  </section>
+
+  <script>
+    const kmsSlider = document.getElementById('kmsPerDay');
+    const mileageSlider = document.getElementById('petrolMileage');
+    const kmsInput = document.getElementById('kmsPerDayInput');
+    const mileageInput = document.getElementById('petrolMileageInput');
+    const cngMileageSlider = document.getElementById('cngMileage');
+    const cngMileageInput = document.getElementById('cngMileageInput');
+    const toggleSwitch = document.getElementById('countryToggle');
+
+    let chartInstance = null;
+    let costData = {};
+    let currencySymbol = 'TZS';
+
+    ['fuelCost', 'cngCost', 'kitCost'].forEach(id => {
+      document.getElementById(id).addEventListener('input', calculateCosts);
+    });
+
+    kmsSlider.addEventListener('input', () => {
+      kmsInput.value = kmsSlider.value;
+      calculateCosts();
+    });
+
+    kmsInput.addEventListener('input', () => {
+      kmsSlider.value = kmsInput.value;
+      calculateCosts();
+    });
+
+    mileageSlider.addEventListener('input', () => {
+      mileageInput.value = mileageSlider.value;
+      calculateCosts();
+    });
+
+    mileageInput.addEventListener('input', () => {
+      mileageSlider.value = mileageInput.value;
+      calculateCosts();
+    });
+
+    cngMileageSlider.addEventListener('input', () => {
+      cngMileageInput.value = cngMileageSlider.value;
+      calculateCosts();
+    });
+
+    cngMileageInput.addEventListener('input', () => {
+      cngMileageSlider.value = cngMileageInput.value;
+      calculateCosts();
+    });
+
+    document.querySelectorAll('.toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.toggle').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateChart(btn.dataset.period);
+      });
+    });
+
+    toggleSwitch.addEventListener('change', () => {
+      const isIndia = !toggleSwitch.checked;
+      if (isIndia) {
+        currencySymbol = '₹';
+        document.getElementById('fuelCost').value = 105;
+        document.getElementById('cngCost').value = 74;
+      } else {
+        currencySymbol = 'TZS';
+        document.getElementById('fuelCost').value = 2877;
+        document.getElementById('cngCost').value = 1400;
+      }
+      calculateCosts();
+    });
+
+    function calculateCosts() {
+      const fuelCost = parseFloat(document.getElementById('fuelCost').value);
+      const cngCost = parseFloat(document.getElementById('cngCost').value);
+      const kmsPerDay = parseFloat(kmsSlider.value);
+      const mileage = parseFloat(mileageSlider.value);
+      const fuelPer100km = 100 / mileage;
+      const cngMileage = parseFloat(cngMileageSlider.value);
+      const cngPer100km = 100 / cngMileage;
+
+      const daysPerMonth = 30, lifetimeYears = 25;
+
+      function calc(distance, consumption, rate) {
+        return (distance / 100) * consumption * rate;
+      }
+
+      const dist = {
+        daily: kmsPerDay,
+        monthly: kmsPerDay * daysPerMonth,
+        yearly: kmsPerDay * daysPerMonth * 12,
+        lifetime: kmsPerDay * daysPerMonth * 12 * lifetimeYears
+      };
+
+      costData = {
+        daily: {
+          petrol: calc(dist.daily, fuelPer100km, fuelCost),
+          cng: calc(dist.daily, cngPer100km, cngCost)
+        },
+        monthly: {
+          petrol: calc(dist.monthly, fuelPer100km, fuelCost),
+          cng: calc(dist.monthly, cngPer100km, cngCost)
+        },
+        yearly: {
+          petrol: calc(dist.yearly, fuelPer100km, fuelCost),
+          cng: calc(dist.yearly, cngPer100km, cngCost)
+        },
+        lifetime: {
+          petrol: calc(dist.lifetime, fuelPer100km, fuelCost),
+          cng: calc(dist.lifetime, cngPer100km, cngCost)
+        }
+      };
+
+      const currentPeriod = document.querySelector('.toggle.active').dataset.period;
+      updateChart(currentPeriod);
+    }
+
+    function updateChart(period) {
+      const ctx = document.getElementById('fuelChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      const petrol = costData[period]?.petrol || 0;
+      const cng = costData[period]?.cng || 0;
+      const savings = petrol - cng;
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Petrol Car', 'CNG Car'],
+          datasets: [{
+            label: `Fuel Cost (${currencySymbol})`,
+            data: [petrol, cng],
+            backgroundColor: ['#3f51b5', '#4caf50']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: `Fuel Cost (${currencySymbol})` }
+            }
+          }
+        }
+      });
+
+      const kitCost = parseFloat(document.getElementById('kitCost').value);
+      const isKitValid = !isNaN(kitCost) && kitCost > 0;
+
+      let label = period.charAt(0).toUpperCase() + period.slice(1);
+      let savingsText = '', paybackText = '';
+
+      if (savings > 0) {
+        savingsText = `You will save <span class="text-success fw-bold">${currencySymbol} ${savings.toFixed(0)}</span> ${label.toLowerCase()} by using CNG.`;
+
+        if (isKitValid) {
+          const paybackDays = kitCost / savings;
+          const totalMonths = paybackDays / 30;
+          const years = Math.floor(totalMonths / 12);
+          const months = Math.round(totalMonths % 12);
+          let formatted = years > 0 ? `${years} year${years > 1 ? 's' : ''}` : '';
+          formatted += (years > 0 && months > 0 ? ' ' : '') + (months > 0 ? `${months} month${months > 1 ? 's' : ''}` : '');
+
+          paybackText = `
+            <div class="alert alert-info text-center" role="alert">
+              <strong>Estimated Kit Payback Period:</strong> ${formatted} (${Math.round(paybackDays)} days)
+            </div>`;
+        }
+      } else if (savings < 0) {
+        savingsText = `You will lose <span class="text-danger fw-bold">${currencySymbol} ${Math.abs(savings).toFixed(0)}</span> ${label.toLowerCase()} by using CNG.`;
+        paybackText = `
+          <div class="alert alert-warning text-center" role="alert">
+            CNG kit payback period can't be estimated as there are no savings.
+          </div>`;
+      } else {
+        savingsText = `You will break even with no ${label.toLowerCase()} savings or loss using CNG.`;
+        paybackText = '';
+      }
+
+      document.getElementById('savings').innerHTML = savingsText;
+      document.getElementById('payback').innerHTML = paybackText;
+    }
+
+    calculateCosts();
+  </script>
+</body>
+</html>
